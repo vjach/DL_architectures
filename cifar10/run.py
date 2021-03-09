@@ -66,4 +66,4 @@ def main(model, log_dir):
 
 if __name__ == "__main__":
     print("Exploring architectures on cifar10")
-    main(models["SqueezeNet_naive"].get(), "SqueezeNet_naive")
+    main(models["MobileNetV1_naive"].get(), "MobileNetV1_naive")
