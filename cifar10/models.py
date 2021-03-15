@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras.datasets import cifar10
 from tensorflow.keras.utils import to_categorical
-from tensorflow.keras.layers import Input, Conv2D, Flatten, Dense, MaxPooling2D, GlobalAveragePooling2D, Lambda, BatchNormalization, concatenate, DepthwiseConv2D, ReLU
+from tensorflow.keras.layers import Input, Add, Conv2D, Dropout, Flatten, Dense, MaxPooling2D, GlobalAveragePooling2D, Lambda, BatchNormalization, concatenate, DepthwiseConv2D, ReLU
 from tensorflow.keras import regularizers
 from tensorflow.keras.activations import softmax
 from tensorflow import keras
@@ -138,6 +138,56 @@ class MobileNetV1(object):
         self._model = keras.Model(inputs=inputs, outputs=outputs)
         return self._model
 
+
+class MobileNetV2(object):
+    def __init__(self, num_classes, blocks=[]):
+        self._num_classes = num_classes
+        self._blocks = blocks
+
+    @staticmethod
+    def _inverted_residual_block(x, stride, expansion_factor, output_channels):
+        in_channels = x.shape[-1]
+        expanded_channels = expansion_factor * in_channels
+
+        out = Conv2D(expanded_channels, kernel_size=(1, 1), strides=1, activation=None, padding="same")(x)
+        out = BatchNormalization()(out)
+        out = ReLU()(out)
+        out = DepthwiseConv2D(kernel_size=(3, 3), strides=stride, activation=None, padding="same")(out)
+        out = BatchNormalization()(out)
+        out = ReLU()(out)
+        out = Conv2D(output_channels, kernel_size=(1, 1), strides=stride, activation=None, padding="same")(out)
+        out = BatchNormalization()(out)
+        if in_channels == output_channels and stride == 1:
+            out = Add()([out, x])
+
+
+        return out;
+
+
+    def _build_graph(self):
+        inputs = Input((32, 32, 3))
+        outputs = Conv2D(32, kernel_size=(3, 3),strides=(1, 1), activation=None, padding="same")(inputs)
+        outputs = BatchNormalization()(outputs)
+        outputs = ReLU()(outputs)
+        outputs = tf.math.sqrt(outputs)
+        for stride, channels, expansion_factor, n in self._blocks:
+            for _ in range(n):
+                outputs = self._inverted_residual_block(outputs, stride=stride, expansion_factor=expansion_factor, output_channels=channels)
+
+        outputs = Conv2D(256, kernel_size=(1, 1), activation=None, padding="same")(outputs)
+        outputs = Dropout(0.25)(outputs)
+        outputs = BatchNormalization()(outputs)
+        outputs = ReLU()(outputs)
+        outputs = GlobalAveragePooling2D()(outputs)
+        outputs = Dense(self._num_classes, activation="sigmoid")(outputs)
+        outputs = Dense(self._num_classes, activation="softmax")(outputs)
+        return inputs, outputs
+
+    def get(self):
+        inputs, outputs = self._build_graph()
+        self._model = keras.Model(inputs=inputs, outputs=outputs)
+        return self._model
+
 models = {
         "vgg_1": VGG(10, [(2, 32)]),
         "vgg_2": VGG(10, [(2, 32), (2, 64)]),
@@ -145,4 +195,5 @@ models = {
         "SqueezeNet_naive": SqueezeNet(10, [[(2, 16, 32)], [(4, 32, 64)]]),
         "SqueezeNet_naive_2": SqueezeNet(10, [[(2, 16, 32), (2, 32, 64)], [(2, 64, 128), (2, 64, 64)]]),
         "MobileNetV1_naive": MobileNetV1(10, [(1, 32), (1, 64), (1, 64), (1, 128), (2, 128), (1, 128)]),
+        "MobileNetV2_naive": MobileNetV2(10, [(1, 16, 1, 1), (1, 24, 6, 3), (2, 32, 6, 1), (1, 64, 6, 3), (2, 128, 6, 1)]),
         }

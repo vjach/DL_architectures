@@ -6,6 +6,7 @@ from tensorflow.keras.optimizers import SGD
 from tensorflow.keras import Model
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.callbacks import LearningRateScheduler, TensorBoard, ModelCheckpoint
+from pathlib import Path
 import argparse
 from models import models
 
@@ -31,8 +32,8 @@ def scheduler(epoch):
     return 0.0001
 
 def main(model, log_dir):
-    INIT_LR = 0.005
-    NUM_EPOCHS = 300
+    INIT_LR = 0.001
+    NUM_EPOCHS = 200
     BATCH_SIZE = 64
 
     train_dataset, test_dataset = load_dataset()
@@ -64,6 +65,9 @@ def main(model, log_dir):
            steps_per_epoch=len(train_x) // BATCH_SIZE, epochs=NUM_EPOCHS,
            validation_data=(test_x, test_y), callbacks=callbacks)
 
+    model.save(str(Path(log_dir).joinpath("model", "model.h5")))
+
 if __name__ == "__main__":
     print("Exploring architectures on cifar10")
-    main(models["MobileNetV1_naive"].get(), "MobileNetV1_naive")
+    model_name = "MobileNetV2_naive"
+    main(models[model_name].get(), model_name)
