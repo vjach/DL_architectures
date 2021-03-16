@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras.datasets import cifar10
 from tensorflow.keras.utils import to_categorical
-from tensorflow.keras.layers import Input, Add, Conv2D, Dropout, Flatten, Dense, MaxPooling2D, GlobalAveragePooling2D, Lambda, BatchNormalization, concatenate, DepthwiseConv2D, ReLU
+from tensorflow.keras.layers import Input, Add, Conv2D, Dropout, Flatten, Dense, MaxPooling2D, GlobalAveragePooling2D, Lambda, BatchNormalization, concatenate, DepthwiseConv2D, ReLU, Activation, Multiply
 from tensorflow.keras import regularizers
 from tensorflow.keras.activations import softmax
 from tensorflow import keras
@@ -169,7 +169,6 @@ class MobileNetV2(object):
         outputs = Conv2D(32, kernel_size=(3, 3),strides=(1, 1), activation=None, padding="same")(inputs)
         outputs = BatchNormalization()(outputs)
         outputs = ReLU()(outputs)
-        outputs = tf.math.sqrt(outputs)
         for stride, channels, expansion_factor, n in self._blocks:
             for _ in range(n):
                 outputs = self._inverted_residual_block(outputs, stride=stride, expansion_factor=expansion_factor, output_channels=channels)
