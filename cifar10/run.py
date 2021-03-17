@@ -69,5 +69,5 @@ def main(model, log_dir):
 
 if __name__ == "__main__":
     print("Exploring architectures on cifar10")
-    model_name = "MobileNetV2_naive"
+    model_name = "EfficientNet"
     main(models[model_name].get(), model_name)
