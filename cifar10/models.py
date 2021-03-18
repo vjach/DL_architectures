@@ -245,7 +245,7 @@ class EfficientNet(object):
                 id_ += 1
                 stride = 1
 
-        outputs = Conv2D(256, kernel_size=(1, 1), activation=None, padding="same")(outputs)
+        outputs = Conv2D(1024, kernel_size=(1, 1), activation=None, padding="same")(outputs)
         outputs = Dropout(0.25)(outputs)
         outputs = BatchNormalization()(outputs)
         outputs = ReLU()(outputs)
@@ -268,5 +268,5 @@ models = {
         "SqueezeNet_naive_2": SqueezeNet(10, [[(2, 16, 32), (2, 32, 64)], [(2, 64, 128), (2, 64, 64)]]),
         "MobileNetV1_naive": MobileNetV1(10, [(1, 32), (1, 64), (1, 64), (1, 128), (2, 128), (1, 128)]),
         "MobileNetV2_naive": MobileNetV2(10, [(1, 16, 1, 1), (1, 24, 6, 3), (2, 32, 6, 1), (1, 64, 6, 3), (2, 128, 6, 1)]),
-        "EfficientNet": EfficientNet(10, [(1, 16, 1, 0.5, 1), (1, 24, 6, 0.5, 3), (2, 40, 6, 0.5, 1), (2, 80, 6, 0.5, 3), (1, 112, 6, 0.5, 1), (2, 192, 6, 0.5, 1)]),
+        "EfficientNet": EfficientNet(10, [(1, 16, 1, 0.25, 1), (1, 24, 6, 0.25, 2), (2, 40, 6, 0.25, 2), (2, 80, 6, 0.25, 3), (1, 112, 6, 0.25, 3), (2, 192, 6, 0.25, 4), (1, 320, 6, 0.25, 1)]),
         }
